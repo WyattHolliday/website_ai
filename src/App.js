@@ -18,7 +18,7 @@ function App() {
       />
       <GameDisplay 
         gameName="Connect 4" 
-        gameDescription="Play tic tac toe against opponents in offline matches!" 
+        gameDescription="Play connect 4 against opponents in offline matches!" 
         gameImg={connect4_img} 
       />
     </>
