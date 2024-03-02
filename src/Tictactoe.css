@@ -1,0 +1,47 @@
+.square {
+    font-size: 24px;
+    font-weight: bold;
+    width: 100px;
+    /* Adjust width to your preference */
+    height: 100px;
+    /* Set the same height as width to make it square */
+    margin: 2px;
+    border: 0;
+    /* Remove border from individual squares */
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    /* Ensures squares are aligned horizontally */
+}
+
+.board {
+    margin-top: 20px;
+}
+
+.board-row:after {
+    clear: both;
+    content: "";
+    display: table;
+}
+
+.board-row>.square {
+    border-right: 1px solid #000;
+    /* Add border between squares */
+    border-bottom: 1px solid #000;
+}
+
+.board-row>.square:nth-child(3n) {
+    border-right: 0;
+    /* Remove border from last square in each row */
+}
+
+.board-row:last-child>.square {
+    border-bottom: 0;
+    /* Remove border from last row */
+}
+
+.home-button {
+    margin-top: 20px;
+}
