@@ -9,15 +9,22 @@ function Tictactoe() {
     navigate('/', { replace: true });
   }
 
-  const [board] = useState(Array(9).fill(null));
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
 
   const renderSquare = (i) => {
     return (
-      // onClick={() => handleClick(i)}>
-      <button className="square col">
+      <button className="square col" onClick={() => handleClick(i)}>
         {board[i]}
       </button>
     );
+  };
+
+  const handleClick = (i) => {
+    const newBoard = [...board];
+    newBoard[i] = xIsNext ? 'X' : 'O';
+    setBoard(newBoard);
+    setXIsNext(!xIsNext);
   };
 
   return (
