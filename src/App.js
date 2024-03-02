@@ -14,7 +14,7 @@ function App() {
         <img src={empty_pfp} className="pfp-img" alt="profile" />
       </header>
       <Routes>
-        <Route path="/" element={<GameDisplay gameName="Tic Tac Toe" gameDescription="Play tic tac toe against opponents in offline matches!" gameImg={tictactoe_img} path="/Tictactoe" />} />
+        <Route path="/" element={<GameDisplay gameName="Tic tac toe" gameDescription="Play tic tac toe against opponents in offline matches!" gameImg={tictactoe_img} path="/Tictactoe" />} />
         <Route path="/Tictactoe" element={<Tictactoe />} />
       </Routes>
     </Router>
