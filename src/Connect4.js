@@ -1,20 +1,12 @@
-import { useNavigate } from 'react-router-dom';
-import './Tictactoe.css';
+import Container from 'react-bootstrap/Container';
+
 
 function Connect4() {
-  let navigate = useNavigate();
-
-  function handleBackToHome() {
-    navigate('/', { replace: true });
-  }
-
-  return (
-    <>
-      <div className='button-container text-center'>
-        <button className='home-button' onClick={handleBackToHome}>Back to Home</button>
-      </div>
-    </>
-  );
+    return (
+        <Container>
+            <p>Welcome to the Connect 4 Game Page!</p>
+        </Container>
+    );
 }
 
 export default Connect4;
