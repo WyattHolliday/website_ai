@@ -1,7 +1,7 @@
 import GameDisplay from './GameDisplay';
-import empty_pfp from './user_avatar.png';
-import tictactoe_img from './tictactoe.png';
-import connect4_img from './connect4.png';
+import empty_pfp from './img/user_avatar.png';
+import tictactoe_img from './img/tictactoe.png';
+import connect4_img from './img/connect4.png';
 import './App.css';
 
 function App() {
@@ -18,7 +18,7 @@ function App() {
       />
       <GameDisplay 
         gameName="Connect 4" 
-        gameDescription="Drop your discs into the grid and get four in a row to win!" 
+        gameDescription="Play tic tac toe against opponents in offline matches!" 
         gameImg={connect4_img} 
       />
     </>
