@@ -1,24 +1,27 @@
-import logo from './logo.svg';
+import GameDisplay from './GameDisplay';
+import empty_pfp from './user_avatar.png';
+import tictactoe_img from './tictactoe.png';
+import connect4_img from './connect4.png';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
+    <>
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1 className='header-text'>Board Game Hub</h1>
+        <img src={empty_pfp} className="pfp-img" alt="profile" />
       </header>
-    </div>
+      <GameDisplay 
+        gameName="Tic Tac Toe" 
+        gameDescription="Play tic tac toe against opponents in offline matches!" 
+        gameImg={tictactoe_img} 
+      />
+      <GameDisplay 
+        gameName="Connect 4" 
+        gameDescription="Drop your discs into the grid and get four in a row to win!" 
+        gameImg={connect4_img} 
+      />
+    </>
   );
 }
 
