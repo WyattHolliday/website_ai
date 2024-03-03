@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Tictactoe from './tictactoe/Tictactoe';
-import Connect4 from './Connect4';
 import TictactoeMenu from './tictactoe/TictactoeMenu';
 import empty_pfp from './img/user_avatar.png';
 import GameSelection from './GameSelection';
