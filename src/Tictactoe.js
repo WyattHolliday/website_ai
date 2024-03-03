@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { find_best_move } from './TictactoeAI';
 import './Tictactoe.css';
 
 function Tictactoe() {
@@ -27,7 +28,18 @@ function Tictactoe() {
       const newBoard = [...board];
       newBoard[i] = xIsNext ? 'X' : 'O';
       setBoard(newBoard);
-      setXIsNext(!xIsNext);
+      // Check for winner after player's move
+      const playerWinner = calculateWinner(newBoard);
+      if (!playerWinner) {
+        // Proceed with AI's move if game is not won by the player
+        const aiMove = find_best_move(newBoard);
+        if (aiMove !== null) {
+          // Update the board with AI's move
+          const updatedBoard = [...newBoard];
+          updatedBoard[aiMove] = !xIsNext ? 'X' : 'O';
+          setBoard(updatedBoard);
+        }
+      }
     }
   };
 
