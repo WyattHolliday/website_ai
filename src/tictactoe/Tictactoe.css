@@ -1,0 +1,66 @@
+.square {
+    font-size: 24px;
+    font-weight: bold;
+    width: 100px;
+    height: 100px;
+    border-radius: 0px !important;
+    /* Set the same height as width to make it square */
+    margin: 2px;
+    border: 0;
+    /* Remove border from individual squares */
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    /* Ensures squares are aligned horizontally */
+}
+
+.board {
+    margin-top: 20px;
+}
+
+.board-row:after {
+    clear: both;
+    content: "";
+    display: table;
+}
+
+.board-row>.square {
+    border-right: 1px solid #000;
+    /* Add border between squares */
+    border-bottom: 1px solid #000;
+}
+
+.board-row>.square:nth-child(3n) {
+    border-right: 0;
+    /* Remove border from last square in each row */
+}
+
+.board-row:last-child>.square {
+    border-bottom: 0;
+    /* Remove border from last row */
+}
+
+.menu-button {
+    margin-top: 20px;
+    margin-right: 30px;
+}
+
+.player-container {
+    display: flex;
+    align-items: center;
+    margin-top: 90px;
+}
+
+.player-column {
+    margin-right: 20px;
+}
+
+.player-turn {
+    font-weight: bold;
+}
+
+.player-not-turn {
+    font-weight: normal;
+}

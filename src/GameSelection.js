@@ -7,7 +7,7 @@ function GameSelection() {
     return (
         <>
             <GameDisplay gameName="Connect 4" gameDescription="Play Connect4 against opponents in offline matches!" gameImg={connect4_img} path="Connect4" />
-            <GameDisplay gameName="Tic tac toe" gameDescription="Play tic tac toe against opponents in offline matches!" gameImg={tictactoe_img} path="Tictactoe" />
+            <GameDisplay gameName="Tic tac toe" gameDescription="Play tic tac toe against opponents in offline matches!" gameImg={tictactoe_img} path="tictactoe/TictactoeMenu" />
         </>
     );
 }

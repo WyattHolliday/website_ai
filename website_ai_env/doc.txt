@@ -1,0 +1,18 @@
+For future use
+
+Activate the virtual environment in \website_ai
+'source /website_ai_env/bin/activate'                             Unix-like systems
+
+'Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass'      Windows
+'.\website_ai_env\Scripts\activate'
+
+Leave env
+'deactivate'
+
+install requirements
+'pip install -r website_ai_env/requirements.txt'
+
+Save new requirements
+'pip freeze > website_ai_env/requirements.txt'
+
+NOTE: In vscode must change python interpreter to be /website_ai_env/Scripts/python.exe (Cmd + Shift + P then type "Python: Select Interpreter") for windows
