@@ -175,15 +175,33 @@ class playerAI {
         return score;
     }
 
-    alphabetapruning(board, alpha, beta) {
+    alphabetapruning(board) {
         let alpha = -Infinity;
         let beta = Infinity;
         let isMaximizing = true;
+        let score;
 
-        let maxValue = this.minimax(board, alpha, beta, isMaximizing, this.maxDepth)
+        let bestMove = null;
+        let bestScore = -Infinity;
+        for (let move of this.getValidMoves(board)) {
+            score = this.minimax(this.makeMove(board, move, player), -Infinity, Infinity, this.maxDepth, false);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+        return bestMove;
     }
 
-    minimax(board, alpha, beta, isMaximizing, remainingDepth) {
+    makeMove(board, move, player) {
+        let newBoard = board.map(arr => arr.slice());
+        let row = move[0];
+        let col = move[1];
+        newBoard[row][col] = player;
+        return newBoard;
+    }
+
+    minimax(board, alpha, beta, remainingDepth, isMaximizing) {
 
 
         // Check if we're in a terminal position, then return the terminal value of the board.
@@ -203,35 +221,25 @@ class playerAI {
             // Get a list of possible moves given the current board.
             // Then call minimax for each state of the board to get the utility.
             let playerMoves = this.getValidMoves(board);
-            for (let move = 0; move < playerMoves.length; move++) {
-                let row = playerMoves[move][0];
-                let col = playerMoves[move][1];
-                board[row][col] = this.player;
-                let score = this.minimax(board, depth - 1, false);
-                board[row][col] = 0;
-                if (score > bestScore) {
-                    this.bestMove = [row, col];
-                    bestScore = Math.max(score, bestScore);
-                }
+            for (let move of playerMoves) {
+                let score = this.minimax(this.makeMove(board, move, player), remainingDepth - 1, alpha, beta,  false);
+                bestScore = Math.max(score, bestScore);
+                alpha = Math.max(alpha, bestScore);
+                if (beta <= alpha) break;
             }
-            alpha = Math.max(alpha, bestScore);
+
             return bestScore;
 
         } else {
-            let bestScore = Infinity;
+            let worstScore = Infinity;
             let opponentMoves = this.getValidMoves(board);
-            for (let move = 0; move < opponentMoves.length; move++) {
-                let row = opponentMoves[move][0];
-                let col = opponentMoves[move][1];
-                board[row][col] = this.opponent;
-                let score = this.minimax(board, depth - 1, true);
-                board[row][col] = 0;
-                if (score < bestScore) {
-                    this.bestMove = [row, col];
-                    bestScore = Math.min(score, bestScore);
-                }
+            for (let move of opponentMoves) {
+                let score = this.minimax(this.makeMove(board, move, player), remainingDepth - 1, alpha, beta,  true);
+                worstScore = Math.min(score, worstScore);
+                beta = Math.min(beta, worstScore);
+                if (beta <= alpha) break;
             }
-            return bestScore;
+            return worstScore;
         }
     }
 }
