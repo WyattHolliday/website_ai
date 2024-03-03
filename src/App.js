@@ -4,6 +4,7 @@ import Connect4 from './Connect4';
 import TictactoeMenu from './tictactoe/TictactoeMenu';
 import empty_pfp from './img/user_avatar.png';
 import GameSelection from './GameSelection';
+import Connect4 from './connect4_components/Connect4';
 import './App.css';
 
 function App() {
