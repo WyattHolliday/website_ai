@@ -1,7 +1,7 @@
-const WIN_VALUE = 10;
-const LOSS_VALUE = -10;
-const PLAYER_SYMBOL = 'X';
-const AI_SYMBOL = 'O';
+let win_value = 10;
+let loss_value = -10;
+let player = 'X';
+let ai = 'O';
 
 function evaluate(board) {
     const lines = [
@@ -15,10 +15,10 @@ function evaluate(board) {
         [2, 4, 6]
     ];
     for (let line of lines) {
-        if (board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]] && board[line[0]] === AI_SYMBOL) {
-            return WIN_VALUE;
-        } else if (board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]] && board[line[0]] === PLAYER_SYMBOL) {
-            return LOSS_VALUE;
+        if (board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]] && board[line[0]] === ai) {
+            return win_value;
+        } else if (board[line[0]] === board[line[1]] && board[line[1]] === board[line[2]] && board[line[0]] === player) {
+            return loss_value;
         }
     }
     return 0;
@@ -35,10 +35,10 @@ function game_over(board) {
 
 function minimax(board, depth, is_maximizing) {
     let score = evaluate(board);
-    if (score === WIN_VALUE) {
+    if (score === win_value) {
         return score - depth;
     }
-    if (score === LOSS_VALUE) {
+    if (score === loss_value) {
         return score + depth;
     }
     if (game_over(board)) {
@@ -49,7 +49,7 @@ function minimax(board, depth, is_maximizing) {
         let best = -Infinity;
         for (let i = 0; i < board.length; i++) {
             if (board[i] === null) {
-                board[i] = AI_SYMBOL;
+                board[i] = ai;
                 best = Math.max(best, minimax(board, depth + 1, !is_maximizing));
                 board[i] = null;
             }
@@ -59,7 +59,7 @@ function minimax(board, depth, is_maximizing) {
         let best = Infinity;
         for (let i = 0; i < board.length; i++) {
             if (board[i] === null) {
-                board[i] = PLAYER_SYMBOL;
+                board[i] = player;
                 best = Math.min(best, minimax(board, depth + 1, !is_maximizing));
                 board[i] = null;
             }
@@ -68,13 +68,18 @@ function minimax(board, depth, is_maximizing) {
     }
 }
 
-export function find_best_move(board) {
+export function find_best_move(board, aisymbol, difficulty = 5) {
+    win_value = difficulty;
+    loss_value = -difficulty;
+    player = aisymbol === 'X' ? 'O' : 'X';
+    ai = aisymbol;
+
     let best_val = -Infinity;
     let best_move = -1;
 
     for (let i = 0; i < board.length; i++) {
         if (board[i] === null) {
-            board[i] = AI_SYMBOL;
+            board[i] = ai;
             let move_val = minimax(board, 0, false);
             board[i] = null;
             if (move_val > best_val) {
