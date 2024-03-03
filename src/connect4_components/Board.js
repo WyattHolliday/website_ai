@@ -2,7 +2,9 @@ import Container from 'react-bootstrap/Container';
 import Slot from './Slot';
 import React, { useState, useEffect } from 'react';
 import { timeout } from 'q';
+import Form from 'react-bootstrap/Form';
 
+let AI_DIFFICULTY = 'easy';
 
 class playerAI {
 
@@ -11,7 +13,6 @@ class playerAI {
         this.player = playerNumber;
         this.opponent = playerNumber === 1 ? 2 : 1;
         this.setDifficulty(difficulty);
-        this.bestMoves = [];
         this.difficulty = difficulty;
     }
 
@@ -42,15 +43,6 @@ class playerAI {
         }
 
         return validMoves;
-    }
-
-    // Given a configuration of the board, the AI should make a move.
-    // Use a standard minimax algorithm to determine the best move.
-    makeMove(board) {
-        this.minimax(board, this.depth, true);
-        this.setDifficulty(this.difficulty);
-
-        return this.bestMove;
     }
 
     fourInARow(board, player) {
@@ -102,90 +94,107 @@ class playerAI {
 
     terminalState(board) {
         // Terminal state is when the board is full or there's a winning condition.
-        if (fourInARow(board, this.player)) {
+        if (this.fourInARow(board, this.player)) {
             return [true, this.player]
         }
-        else if (fourInARow(board, this.opponent)) {
+        else if (this.fourInARow(board, this.opponent)) {
             return [true, this.opponent]
         }
-        else if (board[0].filter(x => x !== 0).length === 0) {
+        else if (board[0].filter(x => x !== 0).length === 7) {
             return [true, null];
         }
         else return [false, null];
     }
 
-    terminalValue(player) {
+    terminalValue(winningPlayer) {
         // We check the board and see if there's a winning condition for the player or the opponent.
         // If so, we return a value which reflects that.
-        if (player === this.player) {
-            return infinity;
+        if (winningPlayer === this.player) {
+            return Infinity;
         }
-        else if (player === this.opponent) {
-            return -infinity;
+        else if (winningPlayer === this.opponent) {
+            return -Infinity;
         }
         else return 0;
     }
 
-    evaluateWindow(window, player, opponent) {
-        let score = 0;
-        if (window.filter(x => x === player).length === 4) {
-            score += 100;
-        } else if (window.filter(x => x === player).length === 3 && window.filter(x => x === 0).length === 1) {
-            score += 5;
-        } else if (window.filter(x => x === player).length === 2 && window.filter(x => x === 0).length === 2) {
-            score += 2;
-        }
+    evaluateWindow(board, row, col, deltaRow, deltaCol) {
+        const WINNING_LENGTH = 4;
+        const ROWS = 5;
+        const COLS = 6;
 
-        if (window.filter(x => x === opponent).length === 3 && window.filter(x => x === 0).length === 1) {
-            score -= 4;
+        let player1Count = 0;
+        let player2Count = 0;
+        for (let i = 0; i < WINNING_LENGTH; i++) {
+            const r = row + i * deltaRow;
+            const c = col + i * deltaCol;
+            if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+                if (board[r][c] === this.player) {
+                    player1Count++;
+                } else if (board[r][c] === this.opponent) {
+                    player2Count++;
+                }
+            }
         }
-
-        return score;
+    
+        if (player1Count === WINNING_LENGTH) {
+            return 100; // Player 1 wins
+        } else if (player2Count === WINNING_LENGTH) {
+            return -100; // Player 2 wins
+        } else {
+            return player1Count - player2Count; // Score based on connected pieces
+        }
     }
 
-    moveUtility(board, player) {
+    moveUtility(board) {
         let score = 0;
-        let opponent = player === 1 ? 2 : 1;
-        // Check for horizontal wins
-        score += evaluateHorizontalWins(board, infinity);
+        const ROWS = 5;
+        const COLS = 6;
+        const WINNING_LENGTH = 4;
 
-        // Check for vertical wins.
-        for (let i = 0; i < board.length - 3; i++) {
-            for (let j = 0; j < board[i].length; j++) {
-                let window = [board[i][j], board[i + 1][j], board[i + 2][j], board[i + 3][j]];
-                score += this.evaluateWindow(window, player, opponent);
+        // Evaluate horizontally
+        for (let row = 0; row < ROWS; row++) {
+            for (let col = 0; col <= COLS - WINNING_LENGTH; col++) {
+                score += this.evaluateWindow(board, row, col, 0, 1); // Check right
             }
         }
-
-        // Check for diagonal wins.
-        for (let i = 0; i < board.length - 3; i++) {
-            for (let j = 0; j < board[i].length - 3; j++) {
-                let window = [board[i][j], board[i + 1][j + 1], board[i + 2][j + 2], board[i + 3][j + 3]];
-                score += this.evaluateWindow(window, player, opponent);
+    
+        // Evaluate vertically
+        for (let row = 0; row <= ROWS - WINNING_LENGTH; row++) {
+            for (let col = 0; col < COLS; col++) {
+                score += this.evaluateWindow(board, row, col, 1, 0); // Check down
             }
         }
-
-        for (let i = 0; i < board.length - 3; i++) {
-            for (let j = 3; j < board[i].length; j++) {
-                let window = [board[i][j], board[i + 1][j - 1], board[i + 2][j - 2], board[i + 3][j - 3]];
-                score += this.evaluateWindow(window, player, opponent);
+    
+        // Evaluate diagonally (positive slope)
+        for (let row = 0; row <= ROWS - WINNING_LENGTH; row++) {
+            for (let col = 0; col <= COLS - WINNING_LENGTH; col++) {
+                score += this.evaluateWindow(board, row, col, 1, 1); // Check down-right
             }
         }
-
+    
+        // Evaluate diagonally (negative slope)
+        for (let row = WINNING_LENGTH - 1; row < ROWS; row++) {
+            for (let col = 0; col <= COLS - WINNING_LENGTH; col++) {
+                score += this.evaluateWindow(board, row, col, -1, 1); // Check up-right
+            }
+        }
+    
         return score;
     }
 
     alphabetapruning(board) {
         let alpha = -Infinity;
         let beta = Infinity;
-        let isMaximizing = true;
+        let isMaximizing = false;
         let score;
 
         let bestMove = null;
         let bestScore = -Infinity;
         for (let move of this.getValidMoves(board)) {
-            score = this.minimax(this.makeMove(board, move, player), -Infinity, Infinity, this.maxDepth, false);
-            if (score > bestScore) {
+            console.log(`AI's first move: ${move}`);
+            score = this.minimax(this.makeMove(board, move, this.player), alpha, beta, this.maxDepth, isMaximizing);
+            if (score >= bestScore) {
                 bestScore = score;
                 bestMove = move;
             }
@@ -203,17 +212,18 @@ class playerAI {
 
     minimax(board, alpha, beta, remainingDepth, isMaximizing) {
 
-
+        console.log("Exploring moves in minimax!");
         // Check if we're in a terminal position, then return the terminal value of the board.
-        let [winningState, player] = this.terminalState(board);
-        if (winningState == true) {
-            return this.terminalValue(player);
+        let [winningState, winningPlayer] = this.terminalState(board);
+        console.log(`Winning State: ${winningState}, Winning Player: ${winningPlayer}`);
+        if (winningState === true) {
+            return this.terminalValue(winningPlayer);
         }
 
         if (remainingDepth === 0) {
             // When we've reached max depth, we 
             // return the heuristic value of the board.
-            return this.moveUtility(board, this.player);
+            return this.moveUtility(board);
         }
 
         if (isMaximizing) {
@@ -221,8 +231,9 @@ class playerAI {
             // Get a list of possible moves given the current board.
             // Then call minimax for each state of the board to get the utility.
             let playerMoves = this.getValidMoves(board);
+            console.log(`Maximizing player's moves at depth ${this.maxDepth-remainingDepth}\n${playerMoves}`);
             for (let move of playerMoves) {
-                let score = this.minimax(this.makeMove(board, move, player), remainingDepth - 1, alpha, beta,  false);
+                let score = this.minimax(this.makeMove(board, move, this.player), alpha, beta,  remainingDepth - 1,  false);
                 bestScore = Math.max(score, bestScore);
                 alpha = Math.max(alpha, bestScore);
                 if (beta <= alpha) break;
@@ -233,8 +244,9 @@ class playerAI {
         } else {
             let worstScore = Infinity;
             let opponentMoves = this.getValidMoves(board);
+            console.log(`Minimizing player's moves at depth ${this.maxDepth-remainingDepth}\n${opponentMoves}`);
             for (let move of opponentMoves) {
-                let score = this.minimax(this.makeMove(board, move, player), remainingDepth - 1, alpha, beta,  true);
+                let score = this.minimax(this.makeMove(board, move, this.opponent), alpha, beta, remainingDepth - 1, true);
                 worstScore = Math.min(score, worstScore);
                 beta = Math.min(beta, worstScore);
                 if (beta <= alpha) break;
@@ -252,9 +264,6 @@ function Board() {
     const WINNING_COUNT = 4;
     const PLAYER_1 = 1;
     const PLAYER_2 = 2;
-    let AI_DIFFICULTY = "hard";
-
-
 
     const [board, setBoard] = useState(
         [...Array(MAX_HEIGHT)].map(() => { return Array(MAX_WIDTH).fill(DEFAULT_VAL) })
@@ -429,39 +438,25 @@ function Board() {
         }
     }
 
-    /*function aiTurn() {
-        setTimeout(() => {
-            console.log(`AI's Turn!`);
-            let aiMove = ai.makeMove(board);
-            console.log(`AI's move: ${aiMove}`);
-            updateBoard(aiMove[0], aiMove[1], currentPlayer);
-            setGameOver(checkWin(aiMove[0], aiMove[1], currentPlayer));
-            let newPlayer = currentPlayer;
-            let newOpp = (currentPlayer === PLAYER_1) ? PLAYER_2 : PLAYER_1;
-            setcurrentPlayer(() => { return newPlayer });
-            setopponentPlayer(() => { return newOpp });
-            console.log(`Current Player: ${currentPlayer}`);
-        },
-            1000)
-    }*/
 
     useEffect(() => {
-        if (currentPlayer === PLAYER_2 ** !gameOver) {
+        if (currentPlayer === PLAYER_2 && !gameOver) {
             setTimeout(() => {
                 console.log(`AI's Turn!`);
                 let ai = new playerAI(PLAYER_2, AI_DIFFICULTY);
-                let aiMove = ai.makeMove(board);
+                let aiMove = ai.alphabetapruning(board);
                 console.log(`AI's move: ${aiMove}`);
                 updateBoard(aiMove[0], aiMove[1], currentPlayer);
                 setGameOver(checkWin(aiMove[0], aiMove[1], currentPlayer));
+                console.log(gameOver)
                 if (!gameOver) {
                     let newOpp = currentPlayer;
                     let newPlayer = (currentPlayer === PLAYER_1) ? PLAYER_2 : PLAYER_1;
                     setcurrentPlayer(() => { return newPlayer });
                     setopponentPlayer(() => { return newOpp });
-                    console.log(`Current Player: ${currentPlayer}`);
+                    
                 }
-            }, 500)
+            }, 1000)
         }
     }, [currentPlayer]);
 
@@ -479,6 +474,56 @@ function Board() {
 
     return (
         <>
+            <Container>
+            <Form>
+            <br></br>
+            <p>Difficulty setting for AI</p>
+                
+      {['radio'].map((type) => (
+        <div key={`default-${type}`} className="mb-3">
+          
+          <Form.Check 
+            onClick={() => 
+                {
+                    AI_DIFFICULTY = 'easy';
+                console.log(AI_DIFFICULTY);
+            }
+            }
+            type={type}
+            name="difficulty"
+            id={`default-${type}`}
+            label={`Small`}
+          />
+
+            <Form.Check // prettier-ignore
+                type={type}
+                onClick={() => 
+                    {
+                        AI_DIFFICULTY = 'medium';
+                        console.log(AI_DIFFICULTY);
+                    }
+                }
+                name="difficulty"
+                id={`default-${type}`}
+                label={`Medium`}
+            />
+
+            <Form.Check // prettier-ignore
+                type={type}
+                onClick={() => 
+                    {
+                        AI_DIFFICULTY = 'hard';
+                        console.log(AI_DIFFICULTY);}
+                }
+                name="difficulty"
+                id={`default-${type}`}
+                label={`Hard`}
+            />
+
+        </div>
+      ))}
+    </Form>
+            </Container>
             {gameOver ?
                 (<Container>
                     <h1 className="winningTitle" style={{ color: opponentPlayer === PLAYER_1 ? "red" : "black" }} >{opponentPlayer === PLAYER_1 ? "Red" : "Black"} Wins!</h1>
