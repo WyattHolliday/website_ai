@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './TictactoeMenu.css';
 
 function TictactoeMenu() {
   let navigate = useNavigate();
-  const [useAI, setUseAI] = useState(true);
-  const [AIFirst, setAIFirst] = useState(false);
-  const [chooseSymbolX, setChooseSymbolX] = useState(true);
-  const [chooseSymbolO, setChooseSymbolO] = useState(false);
-  const [AIDifficulty, setAIDifficulty] = useState(5);
+  const initialChooseSymbolX = JSON.parse(localStorage.getItem('chooseSymbolX')) !== null ? JSON.parse(localStorage.getItem('chooseSymbolX')) : true;
+  const [useAI, setUseAI] = useState(JSON.parse(localStorage.getItem('useAI')) || true);
+  const [AIFirst, setAIFirst] = useState(JSON.parse(localStorage.getItem('AIFirst')) || false);
+  const [chooseSymbolX, setChooseSymbolX] = useState(initialChooseSymbolX);
+  const [chooseSymbolO, setChooseSymbolO] = useState(JSON.parse(localStorage.getItem('chooseSymbolO')) || false);
+  const [AIDifficulty, setAIDifficulty] = useState(JSON.parse(localStorage.getItem('AIDifficulty')) || 5);
+
+  useEffect(() => {
+    localStorage.setItem('useAI', useAI);
+    localStorage.setItem('AIFirst', AIFirst);
+    localStorage.setItem('chooseSymbolX', chooseSymbolX);
+    localStorage.setItem('chooseSymbolO', chooseSymbolO);
+    localStorage.setItem('AIDifficulty', AIDifficulty);
+  }, [useAI, AIFirst, chooseSymbolX, chooseSymbolO, AIDifficulty]);
 
   function handleBackToHome() {
     navigate('/', { replace: true });
@@ -31,6 +40,8 @@ function TictactoeMenu() {
     setChooseSymbolX(event.target.checked);
     if (event.target.checked) {
       setChooseSymbolO(false);
+    } else {
+      setChooseSymbolX(true);
     }
   }
 
@@ -38,12 +49,22 @@ function TictactoeMenu() {
     setChooseSymbolO(event.target.checked);
     if (event.target.checked) {
       setChooseSymbolX(false);
+    } else {
+      setChooseSymbolO(true);
     }
   }
 
   const setAIDifficultyChange = (event) => {
     setAIDifficulty(event.target.value);
   };
+
+  const resetOptions = () => {
+    setUseAI(true);
+    setAIFirst(false);
+    setChooseSymbolX(true);
+    setChooseSymbolO(false);
+    setAIDifficulty(5);
+  }
 
   return (
     <>
@@ -71,7 +92,7 @@ function TictactoeMenu() {
             <input
               id='ai-difficulty-slider'
               type="range"
-              min="1"
+              min="2"
               max="10"
               value={AIDifficulty}
               onChange={setAIDifficultyChange}
@@ -88,10 +109,12 @@ function TictactoeMenu() {
           <h2>About the AI</h2>
           <p className='info-text'>This AI uses a minimax decision algorithm</p>
         </div>
-        {/* <Link to="/tictactoe/Tictactoe"> */}
-        <div id='button-container'>
-          <button onClick={play}>Play!</button>
+        <div className='button-container'>
+          <button id='play-button' onClick={play}>Play!</button>
+        </div>
+        <div className='menu-button-container' id='bottom-button-container'>
           <button onClick={handleBackToHome}>Back to Home</button>
+          <button id='reset-options-button' onClick={resetOptions}>Reset Options</button>
         </div>
       </div>
     </>

@@ -68,15 +68,9 @@ function minimax(board, depth, is_maximizing) {
     }
 }
 
-export function find_best_move(board, aisymbol, difficulty = 5) {
-    win_value = difficulty;
-    loss_value = -difficulty;
-    player = aisymbol === 'X' ? 'O' : 'X';
-    ai = aisymbol;
-
+function search_all_moves(board) {
     let best_val = -Infinity;
     let best_move = -1;
-
     for (let i = 0; i < board.length; i++) {
         if (board[i] === null) {
             board[i] = ai;
@@ -91,4 +85,32 @@ export function find_best_move(board, aisymbol, difficulty = 5) {
     return best_move;
 }
 
-export default find_best_move;
+export function find_ai_move(board, aisymbol, difficulty) {
+    // let difficulty = set_difficulty === 10 ? 17 : set_difficulty;
+    player = aisymbol === 'X' ? 'O' : 'X';
+    ai = aisymbol;
+    let ai_move = null;
+
+    if ((Math.random() * 10) < difficulty) {
+        win_value = 17;
+        loss_value = -17;
+        ai_move = search_all_moves(board) // Find the best move
+    } else if (Math.random() < 0.5) { // Randomly choose a suboptimal move
+        if (Math.random() < 0.5) {
+            win_value = difficulty + 2;
+            loss_value = -difficulty + 2;
+            ai_move = search_all_moves(board) // Find a suboptimal move at difficulty + 2
+        } else {
+            win_value = difficulty - 2;
+            loss_value = -difficulty - 2;
+            ai_move = search_all_moves(board) // Find a suboptimal move at difficulty - 2
+        }
+    } else {
+        win_value = difficulty;
+        loss_value = -difficulty;
+        ai_move = search_all_moves(board) // Find a suboptimal move at difficulty
+    }
+    return ai_move;
+}
+
+export default find_ai_move;

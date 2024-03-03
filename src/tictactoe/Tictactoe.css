@@ -2,8 +2,8 @@
     font-size: 24px;
     font-weight: bold;
     width: 100px;
-    /* Adjust width to your preference */
     height: 100px;
+    border-radius: 0px !important;
     /* Set the same height as width to make it square */
     margin: 2px;
     border: 0;

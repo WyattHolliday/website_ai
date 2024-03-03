@@ -55,19 +55,26 @@
 
 #about-ai-container {
     margin-top: auto;
-    margin-bottom: 30px;
 }
 
 /* buttons */
-#button-container {
+.menu-button-container {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-evenly;
-    width: 200px;
+    width: 350px;
+}
+
+#bottom-button-container {
+    margin-top: 20px;
 }
 
 button {
     padding: 7px;
     border-radius: 7px !important;
+}
+
+#play-button {
+    width: 100px;
 }

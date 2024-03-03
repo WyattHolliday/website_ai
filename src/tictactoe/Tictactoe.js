@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { find_best_move } from './TictactoeAI';
+import { find_ai_move } from './TictactoeAI';
 import './Tictactoe.css';
 
 function Tictactoe() {
@@ -10,7 +10,6 @@ function Tictactoe() {
   const AIFirst = params.get('AIFirst');
   const chooseSymbolX = params.get('chooseSymbolX');
   const AIDifficulty = parseInt(params.get('AIDifficulty'));
-  const [resetCount, setResetCount] = useState(0);
 
   let navigate = useNavigate();
 
@@ -22,11 +21,12 @@ function Tictactoe() {
   const [playerIsNext, setplayerIsNext] = useState(AIFirst === 'false' ? true : false);
   const [gameIsDone, setGameIsDone] = useState(false);
   const [playerIsX, setplayerIsX] = useState(chooseSymbolX === 'true' ? true : false);
+  const [resetCount, setResetCount] = useState(0);
 
   useEffect(() => { // Runs when the component mounts
   if (useAI === 'true' && AIFirst === 'true' && !gameIsDone && !playerIsNext && resetCount === 0) {
     // AI's move
-    const aiMove = find_best_move(board, !playerIsX ? 'X' : 'O', AIDifficulty);
+    const aiMove = find_ai_move(board, !playerIsX ? 'X' : 'O', AIDifficulty);
     const updatedBoard = [...board];
     updatedBoard[aiMove] = !playerIsX ? 'X' : 'O';
     setBoard(updatedBoard);
@@ -44,7 +44,8 @@ function Tictactoe() {
   };
 
   const handleClick = (i) => {
-    if (!gameIsDone) {
+    const won = calculateWinner(board);
+    if (!gameIsDone && board[i] === null && !won) {
       const newBoard = [...board];
       // Make player's move
       newBoard[i] = playerIsX ? 'X' : 'O';
@@ -56,7 +57,7 @@ function Tictactoe() {
         setGameIsDone(true);
       } else if (useAI === 'true') {
         // Get next move
-        const aiMove = find_best_move(newBoard, !playerIsX ? 'X' : 'O', AIDifficulty);
+        const aiMove = find_ai_move(newBoard, !playerIsX ? 'X' : 'O', AIDifficulty);
         if (aiMove !== null && newBoard[aiMove] === null) {
           // Update the board with AI's move
           const updatedBoard = [...newBoard];
@@ -90,7 +91,7 @@ function Tictactoe() {
     setplayerIsNext(AIFirst === 'false');
     if (AIFirst === 'true') {
       // Immediately make AI's move
-      const aiMove = find_best_move(newBoard);
+      const aiMove = find_ai_move(newBoard, !playerIsX ? 'X' : 'O', AIDifficulty);
       const updatedBoard = [...newBoard];
       updatedBoard[aiMove] = !playerIsX ? 'X' : 'O';
       setBoard(updatedBoard);
