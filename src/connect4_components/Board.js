@@ -1,6 +1,6 @@
 import Container from 'react-bootstrap/Container';
 import Slot from './Slot';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { timeout } from 'q';
 
 
@@ -16,9 +16,9 @@ class playerAI {
     }
 
     setDifficulty(difficulty) {
-        if (difficulty === "easy") this.depth = 1;
-        else if (difficulty === "medium") this.depth = 3;
-        else if (difficulty === "hard") this.depth = 5;
+        if (difficulty === "easy") this.maxDepth = 2;
+        else if (difficulty === "medium") this.maxDepth = 4;
+        else if (difficulty === "hard") this.maxDepth = 6;
     }
 
     getValidMoves(board) {
@@ -53,6 +53,79 @@ class playerAI {
         return this.bestMove;
     }
 
+    fourInARow(board, player) {
+        let count = 0;
+        // Check for horizontal wins
+        for (let row = 0; row < board.length; row++) {
+            for (let col = 0; col < board[row].length; col++) {
+                if (board[row][col] === player) {
+                    count++;
+                } else {
+                    count = 0;
+                }
+                if (count === 4) return true;
+            }
+        }
+
+        // Check for vertical wins
+        for (let col = 0; col < board[0].length; col++) {
+            for (let row = 0; row < board.length; row++) {
+                if (board[row][col] === player) {
+                    count++;
+                } else {
+                    count = 0;
+                }
+                if (count === 4) return true;
+            }
+        }
+
+        // Check for diagonal wins
+        for (let row = 0; row < board.length - 3; row++) {
+            for (let col = 0; col < board[row].length - 3; col++) {
+                if (board[row][col] === player && board[row + 1][col + 1] === player && board[row + 2][col + 2] === player && board[row + 3][col + 3] === player) {
+                    return true;
+                }
+            }
+        }
+
+        for (let row = 0; row < board.length - 3; row++) {
+            for (let col = 3; col < board[row].length; col++) {
+                if (board[row][col] === player && board[row + 1][col - 1] === player && board[row + 2][col - 2] === player && board[row + 3][col - 3] === player) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    terminalState(board) {
+        // Terminal state is when the board is full or there's a winning condition.
+        if (fourInARow(board, this.player)) {
+            return [true, this.player]
+        }
+        else if (fourInARow(board, this.opponent)) {
+            return [true, this.opponent]
+        }
+        else if (board[0].filter(x => x !== 0).length === 0) {
+            return [true, null];
+        }
+        else return [false, null];
+    }
+
+    terminalValue(player) {
+        // We check the board and see if there's a winning condition for the player or the opponent.
+        // If so, we return a value which reflects that.
+        if (player === this.player) {
+            return infinity;
+        }
+        else if (player === this.opponent) {
+            return -infinity;
+        }
+        else return 0;
+    }
+
     evaluateWindow(window, player, opponent) {
         let score = 0;
         if (window.filter(x => x === player).length === 4) {
@@ -73,13 +146,8 @@ class playerAI {
     moveUtility(board, player) {
         let score = 0;
         let opponent = player === 1 ? 2 : 1;
-        // Check for horizontal wins.
-        for (let i = 0; i < board.length; i++) {
-            for (let j = 0; j < board[i].length - 3; j++) {
-                let window = board[i].slice(j, j + 4);
-                score += this.evaluateWindow(window, player, opponent);
-            }
-        }
+        // Check for horizontal wins
+        score += evaluateHorizontalWins(board, infinity);
 
         // Check for vertical wins.
         for (let i = 0; i < board.length - 3; i++) {
@@ -107,15 +175,27 @@ class playerAI {
         return score;
     }
 
-    minimax(board, depth, isMaximizing) {
+    alphabetapruning(board, alpha, beta) {
+        let alpha = -Infinity;
+        let beta = Infinity;
+        let isMaximizing = true;
 
-        if (depth === 0) {
+        let maxValue = this.minimax(board, alpha, beta, isMaximizing, this.maxDepth)
+    }
+
+    minimax(board, alpha, beta, isMaximizing, remainingDepth) {
+
+
+        // Check if we're in a terminal position, then return the terminal value of the board.
+        let [winningState, player] = this.terminalState(board);
+        if (winningState == true) {
+            return this.terminalValue(player);
+        }
+
+        if (remainingDepth === 0) {
             // When we've reached max depth, we 
             // return the heuristic value of the board.
-            if (isMaximizing)
-                return this.moveUtility(board, this.player);
-            else
-                return this.moveUtility(board, this.opponent);
+            return this.moveUtility(board, this.player);
         }
 
         if (isMaximizing) {
@@ -134,6 +214,7 @@ class playerAI {
                     bestScore = Math.max(score, bestScore);
                 }
             }
+            alpha = Math.max(alpha, bestScore);
             return bestScore;
 
         } else {
@@ -163,9 +244,7 @@ function Board() {
     const WINNING_COUNT = 4;
     const PLAYER_1 = 1;
     const PLAYER_2 = 2;
-    let AI_DIFFICULTY = "easy";
-
-    // const ai = new playerAI(PLAYER_2, AI_DIFFICULTY);
+    let AI_DIFFICULTY = "hard";
 
 
 
@@ -316,7 +395,7 @@ function Board() {
 
         let column = e.target.getAttribute("x");
 
-        if (column === null) {
+        if (column === null || currentPlayer === PLAYER_2) {
             return;
         }
         else column = parseInt(column);
@@ -357,6 +436,26 @@ function Board() {
         },
             1000)
     }*/
+
+    useEffect(() => {
+        if (currentPlayer === PLAYER_2 ** !gameOver) {
+            setTimeout(() => {
+                console.log(`AI's Turn!`);
+                let ai = new playerAI(PLAYER_2, AI_DIFFICULTY);
+                let aiMove = ai.makeMove(board);
+                console.log(`AI's move: ${aiMove}`);
+                updateBoard(aiMove[0], aiMove[1], currentPlayer);
+                setGameOver(checkWin(aiMove[0], aiMove[1], currentPlayer));
+                if (!gameOver) {
+                    let newOpp = currentPlayer;
+                    let newPlayer = (currentPlayer === PLAYER_1) ? PLAYER_2 : PLAYER_1;
+                    setcurrentPlayer(() => { return newPlayer });
+                    setopponentPlayer(() => { return newOpp });
+                    console.log(`Current Player: ${currentPlayer}`);
+                }
+            }, 500)
+        }
+    }, [currentPlayer]);
 
     const resetGame = () => {
 
